@@ -1,2 +1,2 @@
 # MusicAnalysis-Bayesian_DynamicModel
- Music analysis with a Bayesian Dynamic Model
+Study of the paper by Lu Ren, David B Dunson, Scott Lindroth and Lawrence Carin *Music Analysis with a Bayasian Dynamic Model*
