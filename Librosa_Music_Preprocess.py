@@ -19,10 +19,11 @@ import matplotlib as plt
 
 path_temp =  '' #Mettre le mP3 ici
 
-amplitude, song = librosa.load(path_temp)  
+amplitude, sr = librosa.load(path_temp)
+print(amplitude.shape)
 
 librosa.display.waveplot(amplitude, song, alpha=0.8)
-song_melspecto = librosa.feature.melspectrogram(amplitude, sr=song, power=2.0)
+song_melspecto = librosa.feature.melspectrogram(amplitude, s)
 sbd = librosa.power_to_db(song_melspecto)
 
 # %% Decibel graphs
@@ -30,3 +31,9 @@ librosa.display.specshow(sbd, sr=song, hop_length=500, x_axis='time', y_axis='lo
 
 
 # Utilsier la fonction mfcc pour extraire les paramètres now 
+mfcc(sr=22050, S=sbd, n_mfcc=40)
+plt.figure(figsize=(10, 4))
+librosa.display.specshow(mfccs, x_axis='time')
+plt.colorbar()
+plt.title('MFCC')
+plt.tight_layout()
