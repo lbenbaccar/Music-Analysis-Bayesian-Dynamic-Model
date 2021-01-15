@@ -21,11 +21,11 @@ import scipy
 path_temp =  'Documents/Cours/MSDS/S1/Statistique Bayesienne/MusicAnalysis-Bayesian_DynamicModel.nosync/Data/beatles.mp3' #Mettre le mP3 ici
 #Loading using librosa
 amplitude, sr = librosa.load(path_temp)
+
 #%%Plot of the amplitude
 plt.figure(figsize=(10, 4))
 librosa.display.waveplot(amplitude, sr, alpha=0.8)
 plt.title('Waveform : amplitude ')
-
 
 # %% Melspectrograme
 song_melspecto = librosa.feature.melspectrogram(y=amplitude, sr=sr)
@@ -51,7 +51,7 @@ plt.colorbar()
 #Standardize the columns
 whiten  = scipy.cluster.vq.whiten(mfccs)
 #Creates 16 code books
-codebook,_ = scipy.cluster.vq.kmeans(whiten, 2400)
+codebook,_ = scipy.cluster.vq.kmeans(whiten, 16)
 
 # %% Vector Quantization (VQ)
 code, _ = scipy.cluster.vq.vq(whiten, codebook)
@@ -63,11 +63,11 @@ time = np.arange(0,len(amplitude))/(60*sr) #Convert in minutes
 plt.plot(time, amplitude, alpha=0.8)
 
 #%% Split time
-frame_100ms = int(len(amplitude)*10/sr)
+frame_100ms = int(sr/10)*20
 code_final=[]
 
 for i in range(0, len(amplitude)-frame_100ms, frame_100ms):
-    print(str(i)+'/'+str(len(amplitude)))
+    print(str(i+frame_100ms)+'/'+str(len(amplitude)))
     i_ = i+frame_100ms
     frame_amplitude = amplitude[i:i_]
     frame_mfccs = librosa.feature.mfcc(y=frame_amplitude, sr=sr, n_mfcc=40)
@@ -76,6 +76,11 @@ for i in range(0, len(amplitude)-frame_100ms, frame_100ms):
     frame_code, _ = scipy.cluster.vq.vq(frame_whiten, frame_codebook)
     code_final.append(frame_code)
     
-test = np.concatenate(code_final)   
+test = np.concatenate(code_final)
+
+#%% Plot
+plt.figure(figsize=(10,4))
 plt.plot(test)
+
+
 
