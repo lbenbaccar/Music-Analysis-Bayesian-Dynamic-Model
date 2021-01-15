@@ -58,7 +58,24 @@ code, _ = scipy.cluster.vq.vq(whiten, codebook)
 #Plot
 plt.plot(code)
 
-#%% Time split
+#%% Time conversion
 time = np.arange(0,len(amplitude))/(60*sr) #Convert in minutes
-
 plt.plot(time, amplitude, alpha=0.8)
+
+#%% Split time
+frame_100ms = int(len(amplitude)*10/sr)
+code_final=[]
+
+for i in range(0, len(amplitude)-frame_100ms, frame_100ms):
+    print(str(i)+'/'+str(len(amplitude)))
+    i_ = i+frame_100ms
+    frame_amplitude = amplitude[i:i_]
+    frame_mfccs = librosa.feature.mfcc(y=frame_amplitude, sr=sr, n_mfcc=40)
+    frame_whiten  = scipy.cluster.vq.whiten(frame_mfccs)
+    frame_codebook,_ = scipy.cluster.vq.kmeans(frame_whiten, 16)
+    frame_code, _ = scipy.cluster.vq.vq(frame_whiten, frame_codebook)
+    code_final.append(frame_code)
+    
+test = np.concatenate(code_final)   
+plt.plot(test)
+
