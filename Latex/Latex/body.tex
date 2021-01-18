@@ -22,6 +22,10 @@ The Hidden Markov Model used is described as follows : A discrete sequence of ob
 Because we will use a Hierchical Dirichlet Process to model the parameters $\theta$, we will divide the sequence into $J$ subsequences. This means that we will model J Hidden Markov Models. By taking the notation at the beginning of this section, we will have $j\in \{1, \dots, J\}$ and $x=\{x_j\}_{j=1}^J$ with $x_j=\{ x_{jt}\}_{t=1}^T$. Note that the total length of the discrete sequence is $J\times T$ and every subsequence $x_j$ has a length T. We allow the parameters to be different in each subsequence such that : \begin{align*}
  		x_j \sim HMM(\theta_j)
  \end{align*}
+The joint distribution given $\theta$ is : 
+\begin{align*}
+	p(x|\theta)=\prod^J_{j=1}\left\{ \sum_{s_j}\pi_{{j,1}}\prod^{T-1}_{t=1}a_{s_{j,t+1}} \prod^T_{t=1} b_{s_{j,t}x_{j,t}} \right\}
+\end{align*}
 
 \subsection{Hierchical Dirichlet Process}
 A Hierchical Dirichlet Process is defined as a collection of Dirichlet Processes. Our collection of DP processes is the J parameters $\theta_j$ linked to the HMM. This kind of setting allows for analysing how inter-related are the subsequences one to the others. The first process of the collection is denoted as : 
@@ -30,6 +34,10 @@ A Hierchical Dirichlet Process is defined as a collection of Dirichlet Processes
 \end{align*}
 with $\gamma$ a concentration parameter for the Dirichlet distribution which is symmetrical and H a base probability measure on $\Theta$. The formal definition of a Dirichlet process is $\forall (B_k)_{k=1,\dots, K}$ finite partition of $\Theta$ : \begin{align*}
 	(G_0(B_k))_{k=1,\dots, K}|\gamma, H \sim Dir( (\gamma H(B_k))_{k=1,\dots, K})
+\end{align*}
+The Dirichlet Process can be written wirrten such that :
+\begin{align*}
+	G_0=\sum^\infty_{k=1} \beta_k \delta_{\theta_k}
 \end{align*}
 The first process $G_0$ is then used as the base measure for the other processes : \begin{align*}
 	G_j \sim DP(\alpha, G_O)
