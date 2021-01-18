@@ -16,6 +16,7 @@ class StickyHDPHMM:
         sigma_k ~ InvGamma(a, b)
         """
         
+        
         self.L = L
         self.alpha = alpha
         self.gma = gma
@@ -40,10 +41,13 @@ class StickyHDPHMM:
         
         stickbreaking = self._gem(gma)
         self.beta = np.array([next(stickbreaking) for i in range(L)])
+
+
         self.N = np.zeros((L, L))
         for t in range(1, self.T):
             for i in range(self.n):
                 self.N[self.state[t-1, i], self.state[t, i]] += 1
+        
         self.M = np.zeros(self.N.shape)
         
 
@@ -59,7 +63,7 @@ class StickyHDPHMM:
 
     def _logphi(self, x, mu, sigma):
         """
-        Compute log-likelihood.
+        Compute log-likelihood. 
         """
         return -((x - mu) / sigma) ** 2 / 2 - np.log(sigma)
         
@@ -117,7 +121,9 @@ class StickyHDPHMM:
                                                self.mu[j], 
                                                self.sigma[j]))
                 if exponential(1) > logprob_accept:
+                    #print('accept')
                     self.state[t, obs] = j
+                    
                     self.N[self.state[t-1, obs], j] += 1
                     self.N[self.state[t-1, obs], k] -= 1            
         
@@ -134,13 +140,13 @@ class StickyHDPHMM:
         
         # Step 4: beta and parameters of clusters
         self.beta = dirichlet(np.ones(self.L) * (self.gma / self.L + m_bar))
-
         
+        
+        #Change here
+        self.N[self.N<0]=0
         # Step 5: transition matrix
         self.PI =  np.tile(self.alpha * self.beta, (self.L, 1)) + self.N
-        #No dirichlet <0
-        self.PI[self.PI<=0]=1
-        
+    
 
         for i in range(self.L):
             self.PI[i, :] = dirichlet(self.PI[i, :])

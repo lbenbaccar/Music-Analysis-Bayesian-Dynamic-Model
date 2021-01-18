@@ -24,12 +24,13 @@ plt.plot(np.ravel(data))
 #%%
 #plot sticky hmdmdmdm
 estimates_shdp = np.array([10 ** hdp.getPath(h) for h in range(H)]).T
-plt.plot(np.arange(T), estimates_shdp)
+plt.plot(np.arange(T*3), np.ravel(estimates_shdp))
 
 
 #plot transition matrix
 matrix_transition= hdp.PI
 plt.matshow(matrix_transition, norm=PowerNorm(0.2, 0, 1))#, vmin=0, vmax=0.1, aspect='auto')
+
 
 
 #%%    
@@ -43,7 +44,6 @@ for t in range(1000):
 
 
 #%%
-#plt.matshow(update(t))#, norm=PowerNorm(0.2, 0, 1), vmin=0, vmax=0.1, aspect='auto')
 update(t)
 estimates_shdp = np.array([10**hdp.getPath(h) for h in range(H)]).T
 plt.figure(figsize=(20,4))
