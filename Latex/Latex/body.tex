@@ -45,11 +45,13 @@ with $\delta_{\theta_k}$ an indicator function in $\theta_k$ and $\beta_k$ the m
 	\beta_k&= v_k\prod^{k-1}_{l=1}(1- v_l) \\
 	v_k&\sim Beta(1, \gamma)
 \end{align*}
-with $v_k$ a random variable following a Beta distribution.
-
-The first process $G_0$ is then used as the base measure for the other processes : \begin{align*}
+with $v_k$ the independent random variables following a Beta distribution. The process to obtain the probabilities $\beta_k$ is pictured as breaking a unit-length stick because we start off with a stick of length 1 and at each step we  we break a portion of the what is remaining stick according to $v_k$ and assign to $\beta_k$ the piece broken. The smaller the $\alpha$ the more concentrated is the distribution. The first process $G_0$ is then used as the base measure for the other processes : \begin{align*}
 	G_j \sim DP(\alpha, G_O)
 \end{align*} 
+In our case we consider : 
+\begin{align*}
+	\theta_i' \sim G_0
+\end{align*}
 
 
 

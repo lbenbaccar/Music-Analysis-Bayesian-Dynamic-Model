@@ -3,8 +3,7 @@ from numpy.random import choice, normal, dirichlet, beta, gamma, multinomial, ex
 
 class StickyHDPHMM:
     def __init__(self, data, alpha=1, kappa=1, gma=1,
-                 nu=2, sigma_a=2, sigma_b=2, L=20, 
-                 kmeans_init=False):
+                 nu=2, sigma_a=2, sigma_b=2, L=20):
         """
         Fox, E. B., Sudderth, E. B., Jordan, M. I., 
         & Willsky, A. S. (2011). A sticky HDP-HMM 
@@ -65,7 +64,7 @@ class StickyHDPHMM:
         """
         Compute log-likelihood. 
         """
-        return -((x - mu) / sigma) ** 2 / 2 - np.log(sigma)
+        return -np.power((x - mu) / sigma,2) / 2 - np.log(sigma)
         
     def _gem(self, gma):
         """
@@ -139,7 +138,7 @@ class StickyHDPHMM:
         m_bar = np.sum(self.M, axis=0) - w
         
         # Step 4: beta and parameters of clusters
-        self.beta = dirichlet(np.ones(self.L) * (self.gma / self.L + m_bar))
+        self.beta = dirichlet(np.ones(self.L) * (self.gma / self.L) + m_bar)
         
         
         #Change here

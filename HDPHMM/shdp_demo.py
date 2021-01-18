@@ -16,7 +16,7 @@ T = data.shape[0]
 
 
 logdata = np.log10(data)
-hdp = StickyHDPHMM(logdata, L=L, kappa=0)
+hdp = StickyHDPHMM(logdata, L=L, kappa=1)
 #plot simulated date
 #%%
 plt.figure(figsize=(20,4))
@@ -47,5 +47,5 @@ for t in range(1000):
 update(t)
 estimates_shdp = np.array([10**hdp.getPath(h) for h in range(H)]).T
 plt.figure(figsize=(20,4))
-plt.plot(np.ravel(estimates_shdp))
+plt.plot(estimates_shdp)
 
