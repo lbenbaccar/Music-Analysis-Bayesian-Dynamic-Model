@@ -35,10 +35,18 @@ A Hierchical Dirichlet Process is defined as a collection of Dirichlet Processes
 with $\gamma$ a concentration parameter for the Dirichlet distribution which is symmetrical and H a base probability measure on $\Theta$. The formal definition of a Dirichlet process is $\forall (B_k)_{k=1,\dots, K}$ finite partition of $\Theta$ : \begin{align*}
 	(G_0(B_k))_{k=1,\dots, K}|\gamma, H \sim Dir( (\gamma H(B_k))_{k=1,\dots, K})
 \end{align*}
-The Dirichlet Process can be written wirrten such that :
+We approach the Dirichlet Process with a stick-breaking process and we can write $G_0$ as follows :
 \begin{align*}
 	G_0=\sum^\infty_{k=1} \beta_k \delta_{\theta_k}
 \end{align*}
+with $\delta_{\theta_k}$ an indicator function in $\theta_k$ and $\beta_k$ the mixture weights computed such that :
+\begin{align*}
+\beta_k &\sim Stick(\gamma) \\
+	\beta_k&= v_k\prod^{k-1}_{l=1}(1- v_l) \\
+	v_k&\sim Beta(1, \gamma)
+\end{align*}
+with $v_k$ a random variable following a Beta distribution.
+
 The first process $G_0$ is then used as the base measure for the other processes : \begin{align*}
 	G_j \sim DP(\alpha, G_O)
 \end{align*} 
