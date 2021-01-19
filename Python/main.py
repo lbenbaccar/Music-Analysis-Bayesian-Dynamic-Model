@@ -119,7 +119,8 @@ def sampler(PI, state, betas, N, mu, M):
     
     for i in range(L):
         for j in range(L):
-            M[i, j] = binomial(M[i, j], P[i, j])
+            M[i, j] = binomial(N[i, j], P[i, j])
+            #print(M[i, j])
 
     w = np.array([binomial(M[i, i], kappa / (kappa + alpha*betas[i])) for i in range(L)])
     
@@ -139,6 +140,7 @@ def sampler(PI, state, betas, N, mu, M):
         PI[i, :] = dirichlet(PI[i, :])
         idx = np.where(state == i)
         cluster = data[idx]
+        
         nc = cluster.size
         if nc:
             xmean = np.mean(cluster)
