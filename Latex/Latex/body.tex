@@ -138,6 +138,7 @@ For $i = 1,\dots,n_{ij}$ we sample the random variable and incremet
 \section{Data processing}
 We consider an acoustic signal in a mp3 format loaded in Python using the librosa package. The sampling rate is 22.05kHz which means we have 22050 observations par second of audio signal. The acoustic signal is first loaded as a waveform or amplitude as shown in Figure \ref{fig:waveform}. It represents the pressure change recorded by a recording instrument such as a microphone. We then divide the piece into 100ms contiguous frames. Each amplitude frame is processed by computing its Mel frequency sceptral coefficients (MFCCs). These coefficients are derived from the Melspectrogram that is a log-scale of pitches judged to be equally distanced to one another. The Mel spectrogram is the representation showing the mel frequencies according to time and intensity. The MFCCs are the most popular feature used in audio processing. We compute 40 columns of coefficients for each frame. To obtain a vector sequential data, we quantize each frame of coefficient. First, we \textit{whiten} the columns so each one of them have a unit variance. Indeed, before running k-means agorithm, we need to rescale each feature dimension of the observations by the standard deviation. Then we use the k-means algorithm with 16 centroids to generate to adjusts the classification of the observations into clusters and updates the clusters centroids until the position of the centroids is stable over successive iterations. This yields a code book mapping centroids to codes and vice-versa. After that, we pass them to the vector quantization algorithm which assigns codes from a code book to observations. The result is a 1D discrete sequential data representing the coefficients. After the piece is processed, the sequence is represented as a series of discrete observations. According to the paper, we should have the following figure which represents each observation by its cluster discretization. 
 \begin{figure}[h]
+    \label{fig:output}
     \centering
   	\includegraphics[scale=0.25]{Graphics/output.PNG} 
    	\caption{Sequence of code indices for the Beatle's music using a codebook of dimension $M = 16$}
@@ -152,8 +153,21 @@ Unfortunately, after a lot of attempts, we've never managed to find this plot. A
 
 Indeed, the paper doesn't give enough details about the pre-processing part. We tried to use other papers from the same author, about the same topic, to see if he's giving some other details but we didn't succeed. So, we decided to use simulated data to apply our bayesian model. We found these online in the Github of a similar topic.
 
-
-
 \section{Results}
-% 2 points clé : l'explication des résultats et l'interprétation
+Since our results are not interpretable, we propose to analyze the results of the research paper studied. As we said, after the piece is processed, the sequence is represented as a series of discrete observations as we showed in Figure \ref{fig:output}. Then, we divided the piece into 88 subsequences of 75 observations. The music segmentation results using dHDP HMM model is shown in the following figure : 
+\begin{figure}[h]
+    \centering
+  	\includegraphics[scale=0.32]{Graphics/results.PNG} 
+   	\caption{Paper results}
+\end{figure}
 
+The first plot is the similarity matrix $E(z^{'}z)$. It quantifies how inter-related any one subsequence of the music is to all others. The second one is the segmentation result on the Beatles audio waveform \ref{fig:waveform}. We can see that the audio is decomposed into clear segments of various lengths and some of them are repeated. To analyse the second plot, we have to compare these segments with a music-theoric analysis of the same audio. This method will allowed us to compare the results of our model and the segmentation done by a person.
+
+\begin{figure}[h]
+    \label{fig:segmentation}
+    \centering
+  	\includegraphics[scale=0.32]{Graphics/segmentation.PNG} 
+   	\caption{Paper results}
+\end{figure}
+
+As we see, the segmentation is almost the same. Our music audio is divided into 10 parts with some redundant segments corresponding to the choruses. Each segment represents a specific part of the music: the verse of a singer, the instrumental part,... 
