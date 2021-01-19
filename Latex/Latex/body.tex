@@ -25,7 +25,7 @@ Because we will use a Hierchical Dirichlet Process to model the parameters $\the
 The joint distribution given $\theta$ is : 
 \begin{align*}
 	p(y|\theta)=\prod^J_{j=1}\left\{ \sum_{s_j}a_{s_{j,1}}\prod^{N_j-1}_{i=1}\pi_{s_{j,i+1}} \prod^{N_j}_{i=1} b_{s_{j,i}y_{j,i}} \right\}
-\end{align*}
+\end{align*} \\
 
 \subsection{Hierchical Dirichlet Process}
 A Hierchical Dirichlet Process is defined as a collection of Dirichlet Processes. Our collection of DP processes is the J parameters $\theta_j$ linked to the HMM. This kind of setting allows for analysing how inter-related are the subsequences one to the others. The first process of the collection is denoted as : 
@@ -74,7 +74,7 @@ With $F(\cdot)$ the fixed distribution of the data sample. According to \cite{fo
 	\beta|\gamma &\sim Stick(\gamma) \\
 	\pi_j| \alpha, \kappa, \beta  &\sim DP\left(\alpha + \kappa, \frac{\alpha\beta + \kappa \delta_j}{\alpha + \kappa} \right) 
 \end{align*}
-By adding this parameter, we are increasing the probability of self-transition by an amount proportional to k. If the probability that an observation has the same state as the one after is higher, the changing dynamics will slow down. That is why the $\kappa$ parameter is added on the $j^{th}$ component of $\alpha\beta$. 
+By adding this parameter, we are increasing the probability of self-transition by an amount proportional to k. If the probability that an observation has the same state as the one after is higher, the changing dynamics will slow down. That is why the $\kappa$ parameter is added on the $j^{th}$ component of $\alpha\beta$. \\
 
 \section{Computational method}
 % 2 points clé : la description de la méthode et les difficultés rencontrées
@@ -124,17 +124,14 @@ Because of (\ref{equ:basemeasure}) we have $\mathcal N(y_t, \mu_j, \Sigma_j)\pro
 \begin{align*}
 	p(z_t|z_{t-1}, y, \pi,\theta) \propto p(z_t|\pi_{z_{t-1}})f(y_t|\theta_{z_t})m_{t+1,t}(z_t)
 \end{align*}
-The algorithm computes the $z_t$ with a forward loop starting with $n_{jk}=0$ and the cluster $\mathcal Y_k=\emptyset$  and for each $(j,k)\in \{1,\dots, L\}^2$ computes the probability of $y_t$:
+The algorithm computes the $z_t$ with a forward loop  with for each $(j,k)\in \{1,\dots, L\}^2$ computes the probability of $y_t|z_t=k$:
 \begin{align*}
 	f_k(y_t)=\pi_{z_{t-1}}(k)\mathcal N (y_t,\mu_k,\Sigma_k)m_{t+1,t}(j)
 \end{align*}
-and then assigns a state $z_t$ with :
-\begin{align*}
-	z_t \sim \sum^L_{k=1} f_k(y_t) \delta(z_t, k) 
-\end{align*}
-with $\delta(z_t,k)=\begin{cases}
-	1 & z_t=k \\0 & z_t \not = k
-\end{cases}$ and eventually updates $n_{z_t-1, z_t}$ and adds $y_t$ to the cluster $\mathcal{Y}_k$ for a new assignment $z_t=k$. 
+and then assigns a state $z_t$ if the probability of having $y_t$ conditional to the state $k$ is inferior to the probability conditional to the state $j$  : $f_k(y_t)<f_j(y_t)$ then the state in $t$ is updated $z_t=j$ and we eventually update the transition matrix (N) to add one more transition. \\
+The next step is to sample the variables corresponding 
+
+
 
 \section{Data processing}
 We consider an acoustic signal in a mp3 format loaded in Python using the librosa package. The sampling rate is 22.05kHz which means we have 22050 observations par second of audio signal. The acoustic signal is first loaded as a waveform or amplitude as shown in Figure \ref{fig:waveform}. It represents the pressure change recorded by a recording instrument such as a microphone. We then divide the piece into 100ms contiguous frames. Each amplitude frame is processed by computing its Mel frequency sceptral coefficients (MFCCs). These coefficients are derived from the Melspectrogram that is a log-scale of pitches judged to be equally distanced to one another. The Mel spectrogram is the representation showing the mel frequencies according to time and intensity. The MFCCs are the most popular feature used in audio processing. We compute 40 columns of coefficients for each frame. To obtain a vector sequential data, we quantize each frame of coefficient. First, we \textit{whiten} the columns so each one of them have a unit variance. Indeed, before running k-means agorithm, we need to rescale each feature dimension of the observations by the standard deviation. Then we use the k-means algorithm with 16 centroids to generate to adjusts the classification of the observations into clusters and updates the clusters centroids until the position of the centroids is stable over successive iterations. This yields a code book mapping centroids to codes and vice-versa. After that, we pass them to the vector quantization algorithm which assigns codes from a code book to observations. The result is a 1D discrete sequential data representing the coefficients. After the piece is processed, the sequence is represented as a series of discrete observations. According to the paper, we should have the following figure which represents each observation by its cluster discretization. 

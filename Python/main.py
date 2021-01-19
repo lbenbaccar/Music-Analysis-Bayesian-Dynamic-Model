@@ -70,11 +70,11 @@ M = np.zeros(N.shape)
 #Initialization of the probabilities of transition
 PI = (N.T / (np.sum(N, axis=1) + 1e-7)).T
 
-plt.matshow(PI)
+plt.matshow(PI, norm=PowerNorm(0.2, 0, 1), vmin=0, vmax=0.1, aspect='auto')
     
 #%% Sampling function
        
-def sampler(PI, state, betas, N):
+def sampler(PI, state, betas, N, mu, M):
     for obs in range(n):
         # Step 1: messages
         #Init messages to 1
@@ -112,14 +112,18 @@ def sampler(PI, state, betas, N):
                         N[state[j-1, i], state[j, i]] += 1
             
     # Step 3: auxiliary variables
+    #P contains the parameters for ...
     P = np.tile(betas, (L, 1)) + n
     np.fill_diagonal(P, np.diag(P) + kappa)
     P = 1 - n / P
+    
     for i in range(L):
         for j in range(L):
+           
             M[i, j] = binomial(M[i, j], P[i, j])
 
-    w = np.array([binomial(M[i, i], 1 / (1 + betas[i])) for i in range(L)])
+    w = np.array([binomial(M[i, i], kappa / (kappa + alpha*betas[i])) for i in range(L)])
+    
     m_bar = np.sum(M, axis=0) - w
     
     # Step 4: beta and parameters of clusters
@@ -130,7 +134,7 @@ def sampler(PI, state, betas, N):
     #print(N)
     # Step 5: transition matrix
     PI =  np.tile(alpha * betas, (L, 1)) + N
-
+    np.fill_diagonal(PI, np.diag(PI) + kappa)
 
     for i in range(L):
         PI[i, :] = dirichlet(PI[i, :])
@@ -145,7 +149,7 @@ def sampler(PI, state, betas, N):
         else:
             mu[i] = normal(0, np.sqrt(nu))
             sigma[i] = 1 / gamma(a, b)
-    return PI, state, betas, N
+    return PI, state, betas, N, mu, M
             
 
 
@@ -153,12 +157,13 @@ def sampler(PI, state, betas, N):
 
 for z in range(100):
     print(z)
-    PI, state, betas, N = sampler(PI, state, betas, N)
+    PI, state, betas, N, mu, M = sampler(PI, state, betas, N, mu, M)
     
 
-plt.matshow(PI)
+plt.matshow(PI,norm=PowerNorm(0.2, 0, 1), vmin=0, vmax=0.1, aspect='auto')
 
-# %% PLOT THE FINAL STATES
+
+    # %% PLOT THE FINAL STATES
 plt.figure(figsize=(20,6))
 plt.plot(np.ravel(state))
 
@@ -173,4 +178,5 @@ for h in range(n):
 pathsplot = np.concatenate(pathss)
 #%% PLOT
 plt.figure(figsize=(20,6))
-plt.plot(pahs)
+plt.plot(np.ravel(pathss))
+plt.yscale('log')
