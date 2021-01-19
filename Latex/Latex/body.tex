@@ -137,7 +137,7 @@ The next step is to sample the auxiliary variables. They are introduced to simpl
 		\bar k_{jt}, & w_{jt} =0 \\ j, & w_{jt} =1
 	\end{cases}
 \end{align*}
-With $k_{jt}$ the state actually assigned, $\bar k_{jt}$ a considered state and $w_{jt}$ an override variable that can override the considered state and be assigned instead. This will allow for the $\kappa$ parameter to be taken into account for the "stickiness" of the model. We want 
+With $k_{jt}$ the state actually assigned, $\bar k_{jt}$ a considered state and $w_{jt}$ an override variable that can override the considered state and be assigned instead. This will allow for the $\kappa$ parameter to be taken into account for the "stickiness" of the model. We want at the end a higher probability of staying at the same state to avoid the fast state change dynamic. 
 
 We have to consider the number of observations that are transitioning from state $j$ to $k$ and for each transition $n_{jk}$ the probability that an observation actually transitions is given by a Bernoulli random variable :\begin{align*}
 	Ber\left(\frac{\alpha\beta_k+\kappa\delta(j,k)}{n+ \alpha \beta_k+ \kappa \delta(j,k)} \right)
