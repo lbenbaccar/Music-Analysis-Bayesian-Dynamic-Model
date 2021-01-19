@@ -119,7 +119,6 @@ def sampler(PI, state, betas, N, mu, M):
     
     for i in range(L):
         for j in range(L):
-           
             M[i, j] = binomial(M[i, j], P[i, j])
 
     w = np.array([binomial(M[i, i], kappa / (kappa + alpha*betas[i])) for i in range(L)])

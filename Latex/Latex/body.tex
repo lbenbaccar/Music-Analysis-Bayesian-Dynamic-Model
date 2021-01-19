@@ -129,7 +129,9 @@ The algorithm computes the $z_t$ with a forward loop  with for each $(j,k)\in \{
 	f_k(y_t)=\pi_{z_{t-1}}(k)\mathcal N (y_t,\mu_k,\Sigma_k)m_{t+1,t}(j)
 \end{align*}
 and then assigns a state $z_t$ if the probability of having $y_t$ conditional to the state $k$ is inferior to the probability conditional to the state $j$  : $f_k(y_t)<f_j(y_t)$ then the state in $t$ is updated $z_t=j$ and we eventually update the transition matrix (N) to add one more transition. \\
-The next step is to sample the variables corresponding 
+The next step is to sample the variables corresponding to the number of observations that are assigned a state $k$. The probability that an observation is at time $t$ conditional to the state $k$ is  : \begin{align*}
+	p(t_{ij}=t|k_{jt}=k, 
+\end{align*}
 
 
 
@@ -137,14 +139,14 @@ The next step is to sample the variables corresponding
 We consider an acoustic signal in a mp3 format loaded in Python using the librosa package. The sampling rate is 22.05kHz which means we have 22050 observations par second of audio signal. The acoustic signal is first loaded as a waveform or amplitude as shown in Figure \ref{fig:waveform}. It represents the pressure change recorded by a recording instrument such as a microphone. We then divide the piece into 100ms contiguous frames. Each amplitude frame is processed by computing its Mel frequency sceptral coefficients (MFCCs). These coefficients are derived from the Melspectrogram that is a log-scale of pitches judged to be equally distanced to one another. The Mel spectrogram is the representation showing the mel frequencies according to time and intensity. The MFCCs are the most popular feature used in audio processing. We compute 40 columns of coefficients for each frame. To obtain a vector sequential data, we quantize each frame of coefficient. First, we \textit{whiten} the columns so each one of them have a unit variance. Indeed, before running k-means agorithm, we need to rescale each feature dimension of the observations by the standard deviation. Then we use the k-means algorithm with 16 centroids to generate to adjusts the classification of the observations into clusters and updates the clusters centroids until the position of the centroids is stable over successive iterations. This yields a code book mapping centroids to codes and vice-versa. After that, we pass them to the vector quantization algorithm which assigns codes from a code book to observations. The result is a 1D discrete sequential data representing the coefficients. After the piece is processed, the sequence is represented as a series of discrete observations. According to the paper, we should have the following figure which represents each observation by its cluster discretization. 
 \begin{figure}[h]
     \centering
-  	\includegraphics[scale=0.25]{output.PNG} 
+  	\includegraphics[scale=0.25]{Graphics/output.PNG} 
    	\caption{Sequence of code indices for the Beatle's music using a codebook of dimension $M = 16$}
 \end{figure}
 
 Unfortunately, after a lot of attempts, we've never managed to find this plot. After the discretization using k-means and Vector Quantization, we find the following plot:
 \begin{figure}[h]
     \centering
-  	\includegraphics[scale=0.25]{ouroutput.PNG} 
+  	\includegraphics[scale=0.25]{Graphics/ouroutput.PNG} 
    	\caption{Our output}
 \end{figure}
 
