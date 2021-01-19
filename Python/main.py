@@ -24,12 +24,12 @@ plt.title('Simulated data')
 #%% PARAMETERS
 
 #Parameters prior
-L = 10  #nb of states at the beginning
+L = 40  #nb of states at the beginning
 alpha = 1 #parameter of the DP
-gma = 1 #parameter of the DP
+gamma = 1 #parameter of the DP
 
 #Sticky parameter
-kappa = 2 * data.size
+kappa = 2 #* data.size
 
 # Hyperparameters
 nu = 2
@@ -55,7 +55,7 @@ for i in range(L):
         sigma[i] = np.std(cluster)
         
 #Stick breaking prior on beta
-stickbreaking = stick_breaking(gma)
+stickbreaking = stick_breaking(gamma)
 betas = np.array([next(stickbreaking) for i in range(L)])
 
 #Matrix N with Njk number of transition from state j to k
@@ -109,12 +109,13 @@ def sampler(PI, state, betas, N, mu, M):
 
             
     # Step 3: auxiliary variables
-    #P contains the parameters for ...
-    P = np.tile(betas, (L, 1)) + n
+    #P contains the parameters for the Bernoulli distribution 
+    P = np.tile(betas, (L, 1))*alpha + n
     #Adding the Kappa in diagonal
     np.fill_diagonal(P, np.diag(P) + kappa)
     P = 1 - n / P
     
+    #Computes the M binomial distribution for each state transition
     for i in range(L):
         for j in range(L):
             M[i, j] = binomial(N[i, j], P[i, j])
@@ -124,11 +125,9 @@ def sampler(PI, state, betas, N, mu, M):
     m_bar = np.sum(M, axis=0) - w
     
     # Step 4: beta and parameters of clusters
-    betas = dirichlet(np.ones(L) * (gma / L) + m_bar)
+    betas = dirichlet(np.ones(L) * (gamma / L) + m_bar)
     
-    #Change here
-    #N[N<0]=0
-    #print(N)
+    
     # Step 5: transition matrix
     PI =  np.tile(alpha * betas, (L, 1)) + N
     np.fill_diagonal(PI, np.diag(PI) + kappa)
@@ -177,4 +176,4 @@ pathsplot = np.concatenate(pathss)
 #%% PLOT
 plt.figure(figsize=(20,6))
 plt.plot(np.ravel(pathss))
-#plt.yscale('log')
+plt.yscale('log')
