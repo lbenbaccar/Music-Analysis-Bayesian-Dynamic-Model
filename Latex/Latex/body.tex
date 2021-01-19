@@ -94,7 +94,7 @@ The choice of initialisation of the base measure is made regarding the paper \ci
 	\label{equ:basemeasure}
 \begin{split}
 	y|z=k&\sim \mathcal N (\mu_k, \sigma_k^2) \\
-	\mu_k &\sim \mathcal N (0, s^2) \\
+	\mu_k &\sim \mathcal N (0, \nu^2) \\
 	\sigma^2_k &\sim InvGamma(a,b)
 \end{split}
 \end{equation}
@@ -126,8 +126,7 @@ The algorithm computes the $z_t$ with a forward loop  with for each $(j,k)\in \{
 \begin{align*}
 	f_k(y_t)=\pi_{z_{t-1}}(k)\mathcal N (y_t,\mu_k,\Sigma_k)m_{t+1,t}(j)
 \end{align*}
-and then assigns a state $z_t$ if the probability of having $y_t$ conditional to the state $k$ is inferior to the probability conditional to the state $j$  : $f_k(y_t)<f_j(y_t)$ then the state in $t$ is updated $z_t=j$ and we eventually update the transition matrix (N). \\
-
+and then assigns a state $z_t$ if the probability of having $y_t$ conditional to the state $k$ is inferior to the probability conditional to the state $j$  : $f_k(y_t)<f_j(y_t)$ then the state in $t$ is updated $z_t=j$ and we eventually update the transition matrix (N).
 The next step is to sample the auxiliary variables. They are introduced to simplify the inference algorithm. Those random variables are the following : \begin{align*}
 	w_{jt}|\alpha, \kappa \sim Ber\left( \frac{\kappa}{\alpha+\kappa} \right) \\ 
 	\bar k_{jt} | \beta \sim \beta 
@@ -148,10 +147,21 @@ Then for each $j\in \{1,\dots,L\}$ we sample the number of override variables $w
 \begin{align*}
 	w_{j\cdot}\sim Binomial\left( m_{jj}, \frac{\kappa}{\kappa+\alpha\beta} \right) 
 \end{align*}
-Then we compute $m_{jk}$ the number of observations that consider the state $k$.  
+Then we compute $\bar m_{jk}$ the number of observations that consider the state $k$ and remove the override variable $w_j$ from the $m_{jj}$ counts. 
+The next step is to compute the $\beta$ from their distribution : 
+\begin{align*}
+	\beta^{(n)}\sim Dir(\gamma/L+\bar m_{\cdot 1}, \dots,\gamma/L+ \bar m_{\cdot L})
+\end{align*}
+Then for each $k\in \{1,\dots, L\}$ we sample a new transition distribution $\pi_k$ following : 
+\begin{align*}
+	\pi_k &\sim Dir(\alpha\beta_1+n_{k1}, \dots, \alpha\beta_k+\kappa+n_{kk}, \dots, \alpha\beta_L+n_{kL}) \\
+	\theta_k &\sim  p(\theta | \lambda, \mathcal Y_k)
+\end{align*}
+By taking equations in (\ref{equ:basemeasure}) as base measures we have the parameters $ \theta_k = \{\mu_k, \Sigma_k\}$. We placed a Gaussian prior over the mean of the distribution and an inverse-Gamma over the variance and at the end of the sampler we compute $\mu_k$ and $\sigma_k$ for the distribution. \\
+
 
 \section{Data processing}
-We consider an acoustic signal in a mp3 format loaded in Python using the librosa package. The sampling rate is 22.05kHz which means we have 22050 observations par second of audio signal. The acoustic signal is first loaded as a waveform or amplitude as shown in Figure \ref{fig:waveform}. It represents the pressure change recorded by a recording instrument such as a microphone. We then divide the piece into 100ms contiguous frames. Each amplitude frame is processed by computing its Mel frequency sceptral coefficients (MFCCs). These coefficients are derived from the Melspectrogram that is a log-scale of pitches judged to be equally distanced to one another. The Mel spectrogram is the representation showing the mel frequencies according to time and intensity. The MFCCs are the most popular feature used in audio processing. We compute 40 columns of coefficients for each frame. To obtain a vector sequential data, we quantize each frame of coefficient. First, we \textit{whiten} the columns so each one of them have a unit variance. Indeed, before running k-means agorithm, we need to rescale each feature dimension of the observations by the standard deviation. Then we use the k-means algorithm with 16 centroids to generate to adjusts the classification of the observations into clusters and updates the clusters centroids until the position of the centroids is stable over successive iterations. This yields a code book mapping centroids to codes and vice-versa. After that, we pass them to the vector quantization algorithm which assigns codes from a code book to observations. The result is a 1D discrete sequential data representing the coefficients. After the piece is processed, the sequence is represented as a series of discrete observations. According to the paper, we should have the following figure which represents each observation by its cluster discretization. 
+We consider an acoustic signal in a mp3 format loaded in Python using the librosa package. The sampling rate is 22.05kHz which means we have 22050 observations par second of audio signal. The acoustic signal is first loaded as a waveform or amplitude as shown in Figure \ref{fig:waveform}. It represents the pressure change recorded by a recording instrument such as a microphone. We then divide the piece into 100ms contiguous frames. Each amplitude frame is processed by computing its Mel frequency sceptral coefficients (MFCCs). These coefficients are derived from the Melspectrogram that is a log-scale of pitches judged to be equally distanced to one another. The Mel spectrogram is the representation showing the Mel frequencies according to time and intensity. The MFCCs are the most popular feature used in audio processing. We compute 40 columns of coefficients for each frame. To obtain a vector sequential data, we quantize each frame of coefficient. First, we \textit{whiten} the columns so each one of them have a unit variance. Indeed, before running k-means algorithm, we need to rescale each feature dimension of the observations by the standard deviation. Then we use the k-means algorithm with 16 centroids to generate to adjusts the classification of the observations into clusters and updates the clusters centroids until the position of the centroids is stable over successive iterations. This yields a code book mapping centroids to codes and vice-versa. After that, we pass them to the vector quantization algorithm which assigns codes from a code book to observations. The result is a 1D discrete sequential data representing the coefficients. After the piece is processed, the sequence is represented as a series of discrete observations. According to the paper, we should have the following figure which represents each observation by its cluster discretization. 
 \begin{figure}[h]
     \label{fig:output}
     \centering

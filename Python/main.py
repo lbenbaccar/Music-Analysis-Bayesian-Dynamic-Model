@@ -26,10 +26,10 @@ plt.title('Simulated data')
 #Parameters prior
 L = 40  #nb of states at the beginning
 alpha = 1 #parameter of the DP
-gamma = 1 #parameter of the DP
+gamma_ = 1 #parameter of the DP
 
 #Sticky parameter
-kappa = 2 #* data.size
+kappa = 1 #* data.size
 
 # Hyperparameters
 nu = 2
@@ -55,7 +55,7 @@ for i in range(L):
         sigma[i] = np.std(cluster)
         
 #Stick breaking prior on beta
-stickbreaking = stick_breaking(gamma)
+stickbreaking = stick_breaking(gamma_)
 betas = np.array([next(stickbreaking) for i in range(L)])
 
 #Matrix N with Njk number of transition from state j to k
@@ -69,11 +69,11 @@ M = np.zeros(N.shape)
 #Initialization of the probabilities of transition
 PI = (N.T / (np.sum(N, axis=1) + 1e-7)).T
 
-plt.matshow(PI, norm=PowerNorm(0.2, 0, 1), vmin=0, vmax=0.1, aspect='auto')
+#plt.matshow(PI, norm=PowerNorm(0.2, 0, 1), vmin=0, vmax=0.1, aspect='auto')
     
 #%% Sampling function
        
-def sampler(PI, state, betas, N, mu, M):
+def sampler(PI, state, betas, N, mu, sigma, M):
     for subsequence in range(n):
         # Step 1: messages
         #Init messages to 1
@@ -119,48 +119,51 @@ def sampler(PI, state, betas, N, mu, M):
     for i in range(L):
         for j in range(L):
             M[i, j] = binomial(N[i, j], P[i, j])
-
+            
+    #Computes the override random variables
     w = np.array([binomial(M[i, i], kappa / (kappa + alpha*betas[i])) for i in range(L)])
     
+    #Computes the number of considered states
     m_bar = np.sum(M, axis=0) - w
     
     # Step 4: beta and parameters of clusters
-    betas = dirichlet(np.ones(L) * (gamma / L) + m_bar)
-    
+    betas = dirichlet(np.ones(L) * (gamma_ / L) + m_bar)
     
     # Step 5: transition matrix
     PI =  np.tile(alpha * betas, (L, 1)) + N
     np.fill_diagonal(PI, np.diag(PI) + kappa)
 
+
     for i in range(L):
+       #Derive PI from a Dirichlet 
         PI[i, :] = dirichlet(PI[i, :])
-        idx = np.where(state == i)
-        cluster = data[idx]
         
-        nc = cluster.size
-        if nc:
-            xmean = np.mean(cluster)
-            mu[i] = xmean / (nu/ nc + 1)
-            sigma[i] = (2 * b + (nc - 1) * np.var(cluster) + 
-                             nc * xmean ** 2 / (nu + nc)) / (2 * a + nc - 1)
+        #Find the clusters and update the parameters
+        state_index = np.where(state == i)
+        cluster = data[state_index]
+        cardinal = cluster.size
+        if cardinal:
+            meancluster= np.mean(cluster)
+            mu[i] = meancluster / (nu/ cardinal + 1)
+            sigma[i] = (2 * b + (cardinal - 1) * np.var(cluster) + 
+                             cardinal * meancluster ** 2 / (nu + cardinal)) / (2 * a + cardinal - 1)
         else:
             mu[i] = normal(0, np.sqrt(nu))
             sigma[i] = 1 / gamma(a, b)
-    return PI, state, betas, N, mu, M
+            
+    return PI, state, betas, N, mu, sigma, M
             
 
 
-#%% Run Sampling
-max_iter = 1000
+# %% Run Sampling
+max_iter = 10000
 for z in range(max_iter):
     print(str(z)+'/'+str(max_iter))
-    PI, state, betas, N, mu, M = sampler(PI, state, betas, N, mu, M)
+    PI, state, betas, N, mu, sigma, M = sampler(PI, state, betas, N, mu, sigma, M)
     
-
 plt.matshow(PI,norm=PowerNorm(0.2, 0, 1), vmin=0, vmax=0.1, aspect='auto')
 
-
-    # %% PLOT THE FINAL STATES
+# %% PLOT THE FINAL STATES
 plt.figure(figsize=(20,6))
 plt.plot(np.ravel(state))
 
