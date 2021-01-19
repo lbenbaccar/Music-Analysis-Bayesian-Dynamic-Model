@@ -100,16 +100,14 @@ def sampler(PI, state, betas, N, mu, M):
                                            mu[j], 
                                            sigma[j]))
             if exponential(1) > logprob_accept:
-                #print('accept')
                 state[t, obs] = j
                 
-                #N[state[t-1, obs], j] += 1
-                #N[state[t-1, obs], k] -= 1  
-            #Re compute the transition matrix once the
-                N = np.zeros((L, L))
-                for j in range(1, T):
-                    for i in range(n):
-                        N[state[j-1, i], state[j, i]] += 1
+                N[state[t-1, obs], j] += 1
+                N[state[t-1, obs], k] -= 1 
+                if t != (T-1):
+                    N[k, state[t+1, obs]] -= 1 
+                    N[j, state[t+1, obs]] += 1 
+
             
     # Step 3: auxiliary variables
     #P contains the parameters for ...
