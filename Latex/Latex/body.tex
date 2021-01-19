@@ -25,7 +25,7 @@ Because we will use a Hierchical Dirichlet Process to model the parameters $\the
 The joint distribution given $\theta$ is : 
 \begin{align*}
 	p(y|\theta)=\prod^J_{j=1}\left\{ \sum_{s_j}a_{s_{j,1}}\prod^{N_j-1}_{i=1}\pi_{s_{j,i+1}} \prod^{N_j}_{i=1} b_{s_{j,i}y_{j,i}} \right\}
-\end{align*}
+\end{align*} \\
 
 \subsection{Hierchical Dirichlet Process}
 A Hierchical Dirichlet Process is defined as a collection of Dirichlet Processes. Our collection of DP processes is the J parameters $\theta_j$ linked to the HMM. This kind of setting allows for analysing how inter-related are the subsequences one to the others. The first process of the collection is denoted as : 
@@ -74,7 +74,7 @@ With $F(\cdot)$ the fixed distribution of the data sample. According to \cite{fo
 	\beta|\gamma &\sim Stick(\gamma) \\
 	\pi_j| \alpha, \kappa, \beta  &\sim DP\left(\alpha + \kappa, \frac{\alpha\beta + \kappa \delta_j}{\alpha + \kappa} \right) 
 \end{align*}
-By adding this parameter, we are increasing the probability of self-transition by an amount proportional to k. If the probability that an observation has the same state as the one after is higher, the changing dynamics will slow down. That is why the $\kappa$ parameter is added on the $j^{th}$ component of $\alpha\beta$. 
+By adding this parameter, we are increasing the probability of self-transition by an amount proportional to k. If the probability that an observation has the same state as the one after is higher, the changing dynamics will slow down. That is why the $\kappa$ parameter is added on the $j^{th}$ component of $\alpha\beta$. \\
 
 \section{Computational method}
 % 2 points clé : la description de la méthode et les difficultés rencontrées
@@ -128,7 +128,10 @@ The algorithm computes the $z_t$ with a forward loop  with for each $(j,k)\in \{
 \begin{align*}
 	f_k(y_t)=\pi_{z_{t-1}}(k)\mathcal N (y_t,\mu_k,\Sigma_k)m_{t+1,t}(j)
 \end{align*}
-and then assigns a state $z_t$ if the probability of having $y_t$ conditional to the state $k$ is inferior to the probability conditional to the state $j$  : $f_k(y_t)<f_j(y_t)$ then the state in $t$ is updated $z_t=j$ and we eventually update the transition matrix (N) to add one more transition. 	
+and then assigns a state $z_t$ if the probability of having $y_t$ conditional to the state $k$ is inferior to the probability conditional to the state $j$  : $f_k(y_t)<f_j(y_t)$ then the state in $t$ is updated $z_t=j$ and we eventually update the transition matrix (N) to add one more transition. \\
+The next step is to sample the variables corresponding 
+
+
 
 \section{Data processing}
 We consider an acoustic signal in a mp3 format loaded in Python using the librosa package. The sampling rate is 22.05kHz which means we have 22050 observations par second of audio signal. The acoustic signal is first loaded as a waveform or amplitude as shown in Figure \ref{fig:waveform}. It represents the pressure change recorded by a recording instrument such as a microphone. We then divide the piece into 100ms contiguous frames. Each amplitude frame is processed by computing its Mel frequency sceptral coefficients (MFCCs). These coefficients are derived from the Melspectrogram that is a log-scale of pitches judged to be equally distanced to one another. The Mel spectrogram is the representation showing the mel frequencies according to time and intensity. The MFCCs are the most popular feature used in audio processing. We compute 40 columns of coefficients for each frame. To obtain a vector sequential data, we quantize each frame of coefficient. First, we \textit{whiten} the columns so each one of them have a unit variance. Then we use the k-means algorithm with 16 codebooks and pass them to the vector quantization algorithm. The result is a 1D discrete sequential data representing the coefficients. 
