@@ -8,23 +8,23 @@ To solve this problem, the approach taken is a non-parametric Bayesian model bas
 \begin{figure}[ht]
 	\label{fig:waveform}
 	\centering
-  	\includegraphics[scale=0.5]{Graphics/Audio/waveform2} 
+  	\includegraphics[scale=0.25]{Graphics/Audio/waveform2} 
    	\caption{Audio waveform of the piece considered}
 \end{figure}
 
 \subsection{Hidden Markov Model}
-The Hidden Markov Model used is described as follows : A discrete sequence of observed data $x=\{x_t\}^T_{t=1}$ with $x_t \in \{1,\dots, M \}$ and a corresponding hidden state sequence $s=\{s_t\}^T_{t=1}$ with $s_t \in \{ 1, \dots, I \}$. The states will be analysed as in Section \ref{section:bayesmodel} (intro, chorus, etc.). Each observation is associated to a state. The discrete HMM model is represented by its parameters $\theta=\{A,B,\pi\}$ such that : 
+The Hidden Markov Model used is described as follows : A discrete sequence of observed data $y=\{y_t\}^T_{t=1}$ with $y_t \in \{1,\dots, M \}$ and a corresponding hidden state sequence $s=\{s_t\}^T_{t=1}$ with $s_t \in \{ 1, \dots, I \}$. The states will be analysed as in Section \ref{section:bayesmodel} (intro, chorus, etc.). Each observation is associated to a state. The discrete HMM model is represented by its parameters $\theta=\{\pi,B,A\}$ such that : 
 \begin{itemize}
-	\item $A$ is a set of state transition probabilities, the probability to transition from one state to another.For two states $\rho$ and $\xi$, the transition probability from $\rho$ to $\xi$ is $a_{\rho\xi}=\mathbb P(s_{t+1}=\xi | s_t=\rho)$
+	\item $\pi$ is a set of state transition probabilities, the probability to transition from one state to another.For two states $\rho$ and $\xi$, the transition probability from $\rho$ to $\xi$ is $\pi_{\rho\xi}=\mathbb P(s_{t+1}=\xi | s_t=\rho)$
 	\item $B$ is a set of emission probabilities, the probability that an observation associated to a state $\rho$ is equal to $m$ : $b_{\rho m}=\mathbb P(x_t= m | s_t=\rho)$
-	\item  $\pi$ is the set of initial state distribution, the probability that the first observation in time $t=1$ is equal to the state $\rho$ : $\pi_{\rho}=\mathbb P(s_1=\rho)$
+	\item  $A$ is the set of initial state distribution, the probability that the first observation in time $t=1$ is equal to the state $\rho$ : $a_{\rho}=\mathbb P(s_1=\rho)$
 \end{itemize}
-Because we will use a Hierchical Dirichlet Process to model the parameters $\theta$, we will divide the sequence into $J$ subsequences. This means that we will model J Hidden Markov Models. By taking the notation at the beginning of this section, we will have $j\in \{1, \dots, J\}$ and $x=\{x_j\}_{j=1}^J$ with $x_j=\{ x_{jt}\}_{t=1}^T$. Note that the total length of the discrete sequence is $J\times T$ and every subsequence $x_j$ has a length T. We allow the parameters to be different in each subsequence such that : \begin{align*}
+Because we will use a Hierchical Dirichlet Process to model the parameters $\theta$, we will divide the sequence into $J$ subsequences. This means that we will model J Hidden Markov Models. By taking the notation at the beginning of this section, we will have $j\in \{1, \dots, J\}$ and $y=\{y_j\}_{j=1}^J$ with $y_j=\{ y_{ji}\}_{i=1}^{N_j}$. Note that every subsequence $x_j$ has a length $N_j$. We allow the parameters to be different in each subsequence such that : \begin{align*}
  		x_j \sim HMM(\theta_j)
  \end{align*}
 The joint distribution given $\theta$ is : 
 \begin{align*}
-	p(x|\theta)=\prod^J_{j=1}\left\{ \sum_{s_j}\pi_{{j,1}}\prod^{T-1}_{t=1}a_{s_{j,t+1}} \prod^T_{t=1} b_{s_{j,t}x_{j,t}} \right\}
+	p(y|\theta)=\prod^J_{j=1}\left\{ \sum_{s_j}a_{s_{j,1}}\prod^{N_j-1}_{i=1}\pi_{s_{j,i+1}} \prod^{N_j}_{i=1} b_{s_{j,i}y_{j,i}} \right\}
 \end{align*}
 
 \subsection{Hierchical Dirichlet Process}
@@ -45,23 +45,103 @@ with $\delta_{\theta_k}$ an indicator function in $\theta_k$ and $\beta_k$ the m
 	\beta_k&= v_k\prod^{k-1}_{l=1}(1- v_l) \\
 	v_k&\sim Beta(1, \gamma)
 \end{align*}
-with $v_k$ the independent random variables following a Beta distribution. The process to obtain the probabilities $\beta_k$ is pictured as breaking a unit-length stick because we start off with a stick of length 1 and at each step we  we break a portion of the what is remaining stick according to $v_k$ and assign to $\beta_k$ the piece broken. The smaller the $\alpha$ the more concentrated is the distribution. The first process $G_0$ is then used as the base measure for the other processes : \begin{align*}
-	G_j \sim DP(\alpha, G_O)
-\end{align*} 
-In our case we consider : 
+with $v_k$ the independent random variables following a Beta distribution. The process to obtain the probabilities $\beta_k$ is pictured as breaking a unit-length stick because we start off with a stick of length 1 and at each step we  we break a portion of the what is remaining stick according to $v_k$ and assign to $\beta_k$ the piece broken. The smaller the $\alpha$ the more concentrated is the distribution. The first process $G_0$ (first subsequence) is then used as the base measure for the other processes (other subsequences) : 
 \begin{align*}
-	\theta_i' \sim G_0
+	G_j &\sim DP(\alpha, G_O) \\
+	G_j &= \sum^\infty_{t=1}\tilde{\pi}_{jt} \delta_{\theta^\star_{jt}} \\
+	\tilde{\pi}_{j}| \alpha &\sim Stick(\alpha) \\
+	\theta^\star_{jt}|G_0 &\sim G_0 \\
+	\theta_{ji}'|G_j &\sim G_j \\
+	y_{ji} |\theta'_{ji} &\sim F(\theta'_{ji})\end{align*} 
+with $j\in \{1,\dots, J\},\ i\in \{ 1,\dots, N_j\}$. We know that multiple $\theta^\star_{jt}$ can take the same value $\theta_k$. We can write $G_j$ as a function of unique states :
+\begin{align*}
+	G_j &\sim \sum^\infty_{k=1} \pi_{jk} \delta_{\theta_k} \\
+	\pi_j|\alpha, \beta  &\sim DP(\alpha, \beta) \\
+	\theta_k |H &\sim H
 \end{align*}
+with $\pi_{jk}$ the distribution of the subsequence $j$ over the state $k$ with : 
+\begin{align*}
+	\pi_{jk} = \sum_{t|\theta^\star_{jt}= \theta_k} \tilde{\pi}_{jt}
+\end{align*}
+The model can be re written with an indicator variable $z_{ji}$ for the state assigned to the observation $y_{ji}$ : 
+\begin{align*}
+	G_j &\sim DP(\alpha, G_O) \\
+	z_{ji}|\pi_j &\sim \pi_j \\
+	y_{ji}| \{\theta_k\}, z_{ij} &\sim F(\theta_{z_{ji}})
+\end{align*}
+With $F(\cdot)$ the fixed distribution of the data sample. According to \cite{fox_sticky_2011}, we compute a sticky version of the model by adding a $\kappa$ parameter that will slow down the transitions between states and avoid having unrealistically fast dynamics as results. The new transition distributions are modelled as follows : 
+\begin{align*}
+	\beta|\gamma &\sim Stick(\gamma) \\
+	\pi_j| \alpha, \kappa, \beta  &\sim DP\left(\alpha + \kappa, \frac{\alpha\beta + \kappa \delta_j}{\alpha + \kappa} \right) 
+\end{align*}
+By adding this parameter, we are increasing the probability of self-transition by an amount proportional to k. If the probability that an observation has the same state as the one after is higher, the changing dynamics will slow down. That is why the $\kappa$ parameter is added on the $j^{th}$ component of $\alpha\beta$. 
 
+\section{Computational method}
+% 2 points clé : la description de la méthode et les difficultés rencontrées
+We use the \textit{Gibbs Block Sampler} \cite{fox_sticky_2011} for the inference of the parameters of the sticky HDP-HMM. The first step is to sample $\beta$ and $\pi$. The sampler is defined with a finite Dirichlet prior on $\theta_j$ such that : 
+\begin{align*}
+	\beta | \gamma \sim Dir(\gamma/L, \dots, \gamma/L) \\
+	\pi_j | \alpha, \beta \sim Dir (\alpha\beta_1, \dots, \alpha\beta_L)
+\end{align*}
+This finite approximation is made because when $L\to\infty$ then it converges to the HDP mixture model. The derived posterior distribution is : 
+\begin{align*}
+	\beta|\bar{n},\gamma &\sim Dir(\gamma/L+\bar m_{\cdot1}, \dots, \gamma/L+ \bar m_{\cdot L}) \\
+	\pi_j | z_{1:T},\alpha, \beta &\sim Dir(\alpha\beta+n_{j1}, \dots, \alpha\beta_j+\kappa + n_{jj}, \dots, \alpha \beta_L+n_{jL})
+\end{align*}
+with $n_{jk}$ the number of j to k transitions in the state sequence j.
+The choice of initialisation of the base measure is made regarding the paper with : 
+%todo{see if sample auxiliary variables} 
+\begin{equation}
+	\label{equ:basemeasure}
+\begin{split}
+	y|z=k&\sim \mathcal N (\mu_k, \sigma_k^2) \\
+	\mu_k &\sim \mathcal N (0, s^2) \\
+	\sigma^2_k &\sim InvGamma(a,b)
+\end{split}
+\end{equation}
+	
 
+After, choosing the hyper-parameters and base measure, the next step is to sample the hidden states $z_t$. This is done with a forward-backward algorithm to jointly sample $z$ given $y$ for the sticky HDP-HMM. The conditional distribution is : 
+\begin{align*}
+	p(z|y, \pi, \theta) = p(z_t|z_{t-1}, y, \pi, \theta) p(z_{t-1}|z_{t-2}, y, \pi, \theta) \dots p(z_2|z_1 y, \pi, \theta) p(z_1| y, \pi, \theta) 
+\end{align*} 
+The algorithm starts by sampling $z_1$ from $ p(z_1| y, \pi, \theta)$ then sample $z_2$ from $ p(z_2|z_1, y, \pi, \theta)$ and so on. The conditional distribution is :\begin{align*}
+	 p(z_1| y, \pi, \theta) &\propto p(z_1)f(y_1|\theta_{z_1})\sum_{z_{2:T}} \prod_t p(z_t|\pi_{z_{t-1}})f(y_t|\theta_{z_t})\\&\propto  p(z_1)f(y_1|\theta_{z_1}) \sum_{z_2}p(z_2|\pi_{z_1})f(y_2|\theta_{z_2})m_{3,2}(z_2)
+	 \\ &\propto  p(z_1)f(y_1|\theta_{z_1})m_{2,1}(z_1)
+\end{align*}
+where $m_{t,t-1}(z_{t-1})$ is called the \textit{bakward message} passed from $z_t$ to $z_{t-1}$ and defined by : 
+\begin{align*}
+	m_{t,t-1}(z_{t-1}) \propto p(y_{t:T}|z_{t-1},\pi,\theta)
+\end{align*}
+In the algoritm the messages are first initialized to :\begin{align*}
+	m_{T+1,T}(k)=1
+\end{align*}
+and then with a backward loop for each $k\in \{1,\dots, L\}$ we compute the messages : \begin{align*}
+	m_{t,t-1}(k)&=\sum^L_{j=1}\pi_k(j) \mathcal N(y_t, \mu_j, \Sigma_j)m_{t+1, t}(j)\\
+	&=\sum^L_{j=1}\pi_k(j) \frac{1}{\Sigma_j}\exp\left[ -\frac{1}{2} \left( \frac{y_t-\mu_j}{\Sigma_j}\right)^2\right]m_{t+1, t}(j)
+\end{align*}
+Because of (\ref{equ:basemeasure}) we have $\mathcal N(y_t, \mu_j, \Sigma_j)\propto \frac{1}{\Sigma_j} e^{-\frac{1}{2} \left( \frac{y_t-\mu_j}{\Sigma_j}\right)^2}$.Then we derive the general distribution for $z_t$ which is : 
+\begin{align*}
+	p(z_t|z_{t-1}, y, \pi,\theta) \propto p(z_t|\pi_{z_{t-1}})f(y_t|\theta_{z_t})m_{t+1,t}(z_t)
+\end{align*}
+The algorithm computes the $z_t$ with a forward loop starting with $n_{jk}=0$ and the cluster $\mathcal Y_k=\emptyset$  and for each $(j,k)\in \{1,\dots, L\}^2$ computes the probability of $y_t$:
+\begin{align*}
+	f_k(y_t)=\pi_{z_{t-1}}(k)\mathcal N (y_t,\mu_k,\Sigma_k)m_{t+1,t}(j)
+\end{align*}
+and then assigns a state $z_t$ with :
+\begin{align*}
+	z_t \sim \sum^L_{k=1} f_k(y_t) \delta(z_t, k) 
+\end{align*}
+with $\delta(z_t,k)=\begin{cases}
+	1 & z_t=k \\0 & z_t \not = k
+\end{cases}$ and eventually updates $n_{z_t-1, z_t}$ and adds $y_t$ to the cluster $\mathcal{Y}_k$ for a new assignment $z_t=k$. 
 
 \section{Data processing}
 We consider an acoustic signal in a mp3 format loaded in Python using the librosa package. The sampling rate is 22.05kHz which means we have 22050 observations par second of audio signal. The acoustic signal is first loaded as a waveform or amplitude as shown in Figure \ref{fig:waveform}. It represents the pressure change recorded by a recording instrument such as a microphone. We then divide the piece into 100ms contiguous frames. Each amplitude frame is processed by computing its Mel frequency sceptral coefficients (MFCCs). These coefficients are derived from the Melspectrogram that is a log-scale of pitches judged to be equally distanced to one another. The Mel spectrogram is the representation showing the mel frequencies according to time and intensity. The MFCCs are the most popular feature used in audio processing. We compute 40 columns of coefficients for each frame. To obtain a vector sequential data, we quantize each frame of coefficient. First, we \textit{whiten} the columns so each one of them have a unit variance. Then we use the k-means algorithm with 16 codebooks and pass them to the vector quantization algorithm. The result is a 1D discrete sequential data representing the coefficients. 
 
 
 
-\section{Computational method}
-% 2 points clé : la description de la méthode et les difficultés rencontrées
+
 
 \section{Results}
 % 2 points clé : l'explication des résultats et l'interprétation

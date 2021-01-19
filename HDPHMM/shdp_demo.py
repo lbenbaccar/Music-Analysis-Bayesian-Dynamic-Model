@@ -29,7 +29,7 @@ plt.plot(np.arange(T*3), np.ravel(estimates_shdp))
 
 #plot transition matrix
 matrix_transition= hdp.PI
-plt.matshow(matrix_transition, norm=PowerNorm(0.2, 0, 1))#, vmin=0, vmax=0.1, aspect='auto')
+plt.matshow(matrix_transition, norm=PowerNorm(0.2, 0, 1), vmin=0, vmax=0.1, aspect='auto')
 
 
 

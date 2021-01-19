@@ -30,6 +30,7 @@ class StickyHDPHMM:
         std = np.std(self.data)
         self.mu = normal(0, std, L)
         self.sigma = np.ones(L) * std
+        
         for i in range(L):
             idx = np.where(self.state == i)
             if idx[0].size:
@@ -154,7 +155,7 @@ class StickyHDPHMM:
             nc = cluster.size
             if nc:
                 xmean = np.mean(cluster)
-                self.mu[i] = xmean / (self.nu / nc + 1)
+                self.mu[i] = xmean / (self.nu/ nc + 1)
                 self.sigma[i] = (2 * self.b + (nc - 1) * np.var(cluster) + 
                                  nc * xmean ** 2 / (self.nu + nc)) / (2 * self.a + nc - 1)
             else:
