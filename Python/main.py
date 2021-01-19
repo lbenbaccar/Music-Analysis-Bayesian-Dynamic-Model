@@ -75,50 +75,50 @@ plt.matshow(PI, norm=PowerNorm(0.2, 0, 1), vmin=0, vmax=0.1, aspect='auto')
 #%% Sampling function
        
 def sampler(PI, state, betas, N, mu, M):
-    for obs in range(n):
+    for subsequence in range(n):
         # Step 1: messages
         #Init messages to 1
         messages = np.zeros((T, L))
         messages[-1, :] = 1
         #With a backward loop, compute the messages for each k
         for t in range(T - 1, 0, -1):
-            messages[t-1, :] = PI.dot(messages[t, :] * np.exp(_logphi(data[t, obs], mu, sigma)))
+            messages[t-1, :] = PI.dot(messages[t, :] * np.exp(_logphi(data[t, subsequence], mu, sigma)))
             messages[t-1, :] /= np.max(messages[t-1, :])
         # Step 2: states by MH algorithm
         for t in range(1, T):
             j = choice(L) # proposal
-            k = state[t, obs] 
+            k = state[t, subsequence] 
 
             logprob_accept = (np.log(messages[t, k]) -
                               np.log(messages[t, j]) +
-                              np.log(PI[state[t-1, obs], k]) -
-                              np.log(PI[state[t-1, obs], j]) +
-                              _logphi(data[t-1, obs], 
+                              np.log(PI[state[t-1, subsequence], k]) -
+                              np.log(PI[state[t-1, subsequence], j]) +
+                              _logphi(data[t-1, subsequence], 
                                            mu[k], 
                                            sigma[k]) -
-                              _logphi(data[t-1, obs], 
+                              _logphi(data[t-1, subsequence], 
                                            mu[j], 
                                            sigma[j]))
             if exponential(1) > logprob_accept:
-                state[t, obs] = j
+                state[t, subsequence] = j
                 
-                N[state[t-1, obs], j] += 1
-                N[state[t-1, obs], k] -= 1 
+                N[state[t-1, subsequence], j] += 1
+                N[state[t-1, subsequence], k] -= 1 
                 if t != (T-1):
-                    N[k, state[t+1, obs]] -= 1 
-                    N[j, state[t+1, obs]] += 1 
+                    N[k, state[t+1, subsequence]] -= 1 
+                    N[j, state[t+1, subsequence]] += 1 
 
             
     # Step 3: auxiliary variables
     #P contains the parameters for ...
     P = np.tile(betas, (L, 1)) + n
+    #Adding the Kappa in diagonal
     np.fill_diagonal(P, np.diag(P) + kappa)
     P = 1 - n / P
     
     for i in range(L):
         for j in range(L):
             M[i, j] = binomial(N[i, j], P[i, j])
-            #print(M[i, j])
 
     w = np.array([binomial(M[i, i], kappa / (kappa + alpha*betas[i])) for i in range(L)])
     
@@ -153,9 +153,9 @@ def sampler(PI, state, betas, N, mu, M):
 
 
 #%% Run Sampling
-
-for z in range(100):
-    print(z)
+max_iter = 1000
+for z in range(max_iter):
+    print(str(z)+'/'+str(max_iter))
     PI, state, betas, N, mu, M = sampler(PI, state, betas, N, mu, M)
     
 
