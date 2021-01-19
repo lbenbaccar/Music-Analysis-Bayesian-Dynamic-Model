@@ -128,11 +128,11 @@ The algorithm computes the $z_t$ with a forward loop  with for each $(j,k)\in \{
 \begin{align*}
 	f_k(y_t)=\pi_{z_{t-1}}(k)\mathcal N (y_t,\mu_k,\Sigma_k)m_{t+1,t}(j)
 \end{align*}
-and then assigns a state $z_t$ if the probability of having $y_t$ conditional to the state $k$ is inferior to the probability conditional to the state $j$  : $f_k(y_t)<f_j(y_t)$ then the state in $t$ is updated $z_t=j$ and we eventually update the transition matrix (N) to add one more transition. \\
-The next step is to sample the variables corresponding to the number of observations that are assigned a state $k$. The probability that an observation is at time $t$ conditional to the state $k$ is  : \begin{align*}
-	p(t_{ij}=t|k_{jt}=k, 
-\end{align*}
+and then assigns a state $z_t$ if the probability of having $y_t$ conditional to the state $k$ is inferior to the probability conditional to the state $j$  : $f_k(y_t)<f_j(y_t)$ then the state in $t$ is updated $z_t=j$ and we eventually update the transition matrix (N). \\
 
+The next step is to sample the variables corresponding to the number of observations that are assigned a state $k$. We have to consider the number of observations that are transitioning from state $j$ to $k$ and for each transition $n_{jk}$ the probability that an observation actually transitions is given by a Bernoulli random variable : \begin{align*}
+	
+\end{align*}
 
 
 \section{Data processing}
