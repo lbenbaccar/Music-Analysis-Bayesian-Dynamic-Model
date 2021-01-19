@@ -36,7 +36,6 @@ nu = 2
 a = 2
 b = 2
 
-
 #%% Initialize
 #Shape of the data
 T, n = data.shape
@@ -178,4 +177,4 @@ pathsplot = np.concatenate(pathss)
 #%% PLOT
 plt.figure(figsize=(20,6))
 plt.plot(np.ravel(pathss))
-plt.yscale('log')
+#plt.yscale('log')

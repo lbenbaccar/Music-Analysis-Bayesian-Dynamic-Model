@@ -89,8 +89,7 @@ This finite approximation is made because when $L\to\infty$ then it converges to
 	\pi_j | z_{1:T},\alpha, \beta &\sim Dir(\alpha\beta+n_{j1}, \dots, \alpha\beta_j+\kappa + n_{jj}, \dots, \alpha \beta_L+n_{jL})
 \end{align*}
 with $n_{jk}$ the number of j to k transitions in the state sequence j.
-The choice of initialisation of the base measure is made regarding the paper with : 
-%todo{see if sample auxiliary variables} 
+The choice of initialisation of the base measure is made regarding the paper \cite{fox_sticky_2011} with :  
 \begin{equation}
 	\label{equ:basemeasure}
 \begin{split}
@@ -130,10 +129,27 @@ The algorithm computes the $z_t$ with a forward loop  with for each $(j,k)\in \{
 \end{align*}
 and then assigns a state $z_t$ if the probability of having $y_t$ conditional to the state $k$ is inferior to the probability conditional to the state $j$  : $f_k(y_t)<f_j(y_t)$ then the state in $t$ is updated $z_t=j$ and we eventually update the transition matrix (N). \\
 
-The next step is to sample the variables corresponding to the number of observations that are assigned a state $k$. We have to consider the number of observations that are transitioning from state $j$ to $k$ and for each transition $n_{jk}$ the probability that an observation actually transitions is given by a Bernoulli random variable :\begin{align*}
+The next step is to sample the auxiliary variables. They are introduced to simplify the inference algorithm. Those random variables are the following : \begin{align*}
+	w_{jt}|\alpha, \kappa \sim Ber\left( \frac{\kappa}{\alpha+\kappa} \right) \\ 
+	\bar k_{jt} | \beta \sim \beta 
+	\\ 
+	k_{jt} | \bar k_{jt} , w_{jt} = \begin{cases}
+		\bar k_{jt}, & w_{jt} =0 \\ j, & w_{jt} =1
+	\end{cases}
+\end{align*}
+With $k_{jt}$ the state actually assigned, $\bar k_{jt}$ a considered state and $w_{jt}$ an override variable that can override the considered state and be assigned instead. This will allow for the $\kappa$ parameter to be taken into account for the "stickiness" of the model. We want 
+
+We have to consider the number of observations that are transitioning from state $j$ to $k$ and for each transition $n_{jk}$ the probability that an observation actually transitions is given by a Bernoulli random variable :\begin{align*}
 	Ber\left(\frac{\alpha\beta_k+\kappa\delta(j,k)}{n+ \alpha \beta_k+ \kappa \delta(j,k)} \right)
 \end{align*}
-For $i = 1,\dots,n_{ij}$ we sample the random variable and incremet 
+For $i = 1,\dots,n_{ij}$ we sample the random variable and increment the count $m$ when the variable is equal to 1, then $m_{jk}$ follows a Binomial distribution :
+\begin{align*}
+		m_{jk} \sim Binomial\left(n_{jk},\:\frac{\alpha\beta_k+\kappa\delta(j,k)}{n+ \alpha \beta_k+ \kappa \delta(j,k)} \right)
+\end{align*}
+Then for each $j\in \{1,\dots,L\}$ we sample the number of override variables $w_{j\cdot}$ in state j. 
+\begin{align*}
+	w_{j\cdot}\sim Binomial\left( m_{jj}, \frac{}{} \right) 
+\end{align*}
 
 \section{Data processing}
 We consider an acoustic signal in a mp3 format loaded in Python using the librosa package. The sampling rate is 22.05kHz which means we have 22050 observations par second of audio signal. The acoustic signal is first loaded as a waveform or amplitude as shown in Figure \ref{fig:waveform}. It represents the pressure change recorded by a recording instrument such as a microphone. We then divide the piece into 100ms contiguous frames. Each amplitude frame is processed by computing its Mel frequency sceptral coefficients (MFCCs). These coefficients are derived from the Melspectrogram that is a log-scale of pitches judged to be equally distanced to one another. The Mel spectrogram is the representation showing the mel frequencies according to time and intensity. The MFCCs are the most popular feature used in audio processing. We compute 40 columns of coefficients for each frame. To obtain a vector sequential data, we quantize each frame of coefficient. First, we \textit{whiten} the columns so each one of them have a unit variance. Indeed, before running k-means agorithm, we need to rescale each feature dimension of the observations by the standard deviation. Then we use the k-means algorithm with 16 centroids to generate to adjusts the classification of the observations into clusters and updates the clusters centroids until the position of the centroids is stable over successive iterations. This yields a code book mapping centroids to codes and vice-versa. After that, we pass them to the vector quantization algorithm which assigns codes from a code book to observations. The result is a 1D discrete sequential data representing the coefficients. After the piece is processed, the sequence is represented as a series of discrete observations. According to the paper, we should have the following figure which represents each observation by its cluster discretization. 
