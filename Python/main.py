@@ -173,4 +173,4 @@ for h in range(n):
 pathsplot = np.concatenate(pathss)
 #%% PLOT
 plt.figure(figsize=(20,6))
-plt.plot(pahs)
+plt.plot(np.ravel(pathss))
