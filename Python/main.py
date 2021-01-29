@@ -156,7 +156,7 @@ def sampler(PI, state, betas, N, mu, sigma, M):
 
 
 # %% Run Sampling
-max_iter = 10000
+max_iter = 300
 for z in range(max_iter):
     print(str(z)+'/'+str(max_iter))
     PI, state, betas, N, mu, sigma, M = sampler(PI, state, betas, N, mu, sigma, M)
