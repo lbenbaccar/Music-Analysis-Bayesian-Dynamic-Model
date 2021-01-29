@@ -8,7 +8,7 @@ To solve this problem, the approach taken is a non-parametric Bayesian model bas
 \begin{figure}[ht]
 	\label{fig:waveform}
 	\centering
-  	\includegraphics[scale=0.25]{Graphics/Audio/waveform2} 
+  	\includegraphics[scale=0.23]{Graphics/Audio/waveform2} 
    	\caption{Audio waveform of the piece considered}
 \end{figure}
 
@@ -165,27 +165,18 @@ We consider an acoustic signal in a mp3 format loaded in Python using the libros
 \begin{figure}[h]
     \label{fig:output}
     \centering
-  	\includegraphics[scale=0.25]{Graphics/output.PNG} 
+  	\includegraphics[scale=0.23]{Graphics/output.PNG} 
    	\caption{Sequence of code indices for the Beatle's music using a codebook of dimension $M = 16$}
 \end{figure}
 
-Unfortunately, after a lot of attempts, we've never managed to find this plot. After the discretization using k-means and Vector Quantization, we find the following plot:
-\begin{figure}[h]
-    \centering
-  	\includegraphics[scale=0.25]{Graphics/ouroutput.PNG} 
-   	\caption{Our output}
-\end{figure}
-
-Indeed, the paper doesn't give enough details about the pre-processing part. We tried to use other papers from the same author, about the same topic, to see if he's giving some other details but we didn't succeed. So, we decided to use simulated data to apply our bayesian model. We found them online in the Github of a similar topic.
+Unfortunately, after a lot of attempts, after using discretization with k-means and Vector Quantization, it seems that we are missing information to obtain the previous plot. Indeed, the paper does not give enough details about the pre-processing part. We tried to use other papers from the same author, about the same topic, to see if he is giving some other details but we did not succeed. So, we decided to use simulated data to apply our bayesian model. We found those online in a paper of a similar topic.
 
 \section{Results}
 Since our results are not interpretable, we propose to analyze the results of the research paper studied. As we said, after the piece is processed, the sequence is represented as a series of discrete observations as we showed in Figure \ref{fig:output}. Then, we divided the piece into 88 subsequences of 75 observations. The music segmentation results using dHDP HMM model is shown in the following figure : 
 \begin{figure}[h]
     \centering
-  	\includegraphics[scale=0.32]{Graphics/results.PNG} 
+  	\includegraphics[scale=0.40]{Graphics/results.PNG} 
    	\caption{Paper results}
 \end{figure}
 
-The first plot is the similarity matrix $E(z^{'}z)$. It quantifies how inter-related any one subsequence of the music is to all others. The second one is the segmentation result on the Beatles audio waveform \ref{fig:waveform}. We can see that the audio is decomposed into clear segments of various lengths and some of them are repeated. To analyse the second plot, we have to compare these segments with a music-theoric analysis of the same audio. This method will allowed us to compare the results of our model and the segmentation done by a person.
-
-The last plot is the segmentation and we can see that it's almost the same. Our music audio is divided into 10 parts with some redundant segments corresponding to the choruses. Each segment represents a specific part of the music: the verse of a singer, the instrumental part,... 
+The first plot is the similarity matrix $E(z^{'}z)$. It quantifies how inter-related any one subsequence of the music is to all others. The second one is the segmentation result on the Beatles audio waveform \ref{fig:waveform}. We can see that the audio is decomposed into clear segments of various lengths and some of them are repeated. To analyse the second plot, we have to compare these segments with a music-theoric analysis of the same audio. This method will allowed us to compare the results of our model and the segmentation done by a person. The last plot is the segmentation and we can see that it's almost the same. Our music audio is divided into 10 parts with some redundant segments corresponding to the choruses. Each segment represents a specific part of the music: the verse of a singer, the instrumental part,... 
