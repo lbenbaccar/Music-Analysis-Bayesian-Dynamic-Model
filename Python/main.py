@@ -24,7 +24,7 @@ plt.title('Simulated data')
 #%% PARAMETERS
 
 #Parameters prior
-L = 40  #nb of states at the beginning
+L = 5  #nb of states at the beginning
 alpha = 1 #parameter of the DP
 gamma_ = 1 #parameter of the DP
 
@@ -156,7 +156,7 @@ def sampler(PI, state, betas, N, mu, sigma, M):
 
 
 # %% Run Sampling
-max_iter = 10000
+max_iter = 30000
 for z in range(max_iter):
     print(str(z)+'/'+str(max_iter))
     PI, state, betas, N, mu, sigma, M = sampler(PI, state, betas, N, mu, sigma, M)
@@ -179,4 +179,4 @@ pathsplot = np.concatenate(pathss)
 #%% PLOT
 plt.figure(figsize=(20,6))
 plt.plot(np.ravel(pathss))
-plt.yscale('log')
+#plt.yscale('log')
