@@ -24,7 +24,7 @@ plt.title('Simulated data')
 #%% PARAMETERS
 
 #Parameters prior
-L = 40  #nb of states at the beginning
+L = 5  #nb of states at the beginning
 alpha = 1 #parameter of the DP
 gamma_ = 1 #parameter of the DP
 
@@ -179,4 +179,4 @@ pathsplot = np.concatenate(pathss)
 #%% PLOT
 plt.figure(figsize=(20,6))
 plt.plot(np.ravel(pathss))
-plt.yscale('log')
+#plt.yscale('log')
