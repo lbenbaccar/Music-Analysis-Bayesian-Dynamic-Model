@@ -1,5 +1,5 @@
 # MusicAnalysis-Bayesian_DynamicModel
-Study of the paper by Lu Ren, David B Dunson, Scott Lindroth and Lawrence Carin *Music Analysis with a Bayasian Dynamic Model*
+Study of the paper by Lu Ren, David B Dunson, Scott Lindroth and Lawrence Carin *Music Analysis with a Bayesian Dynamic Model*
 ![Music](https://eecsnews.engin.umich.edu/wp-content/uploads/sites/2/2018/05/real-digital-processing-music-content.jpg)
 >*Source : A real-world approach to digital signal processing* (https://ece.engin.umich.edu)
 
