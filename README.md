@@ -10,6 +10,6 @@ The data used is a music, represented by a sequence of discrete observations mod
 The sampling is done with a Gibbs Block Sampler. 
 
 ## Model inference
-Music segmentation using the HMM model comapred to a music-theoretic analysis. 
+Music segmentation using the HMM model compared to a music-theoretic analysis. 
 
 
